@@ -42,7 +42,7 @@ This repository contains the code for setting up a federated marketplace using G
 
    Create tables `shops` and `partners`:
 
-      `CREATE TABLE shops ( id SERIAL PRIMARY KEY, name VARCHAR(255), webhookURL VARCHAR(255), publicKey VARCHAR(1024));`
+      `CREATE TABLE shops ( id SERIAL PRIMARY KEY, name VARCHAR(255) UNIQUE, webhookURL VARCHAR(255), publicKey VARCHAR(1024));`
 
       `CREATE TABLE partners ( shopId SERIAL PRIMARY KEY, shopName VARCHAR(255), canEarnCommission BOOLEAN, canShareInventory BOOLEAN, canShareData BOOLEAN, canCoPromote BOOLEAN, canSell BOOLEAN, publicKey VARCHAR(1024));`
 
@@ -57,5 +57,5 @@ This repository contains the code for setting up a federated marketplace using G
 
      **Important:** Hub and AuthServer from Federation-Hub should be running so that shop can join Federation.
 
-4. Additional Notes:
+6. Additional Notes:
    - You can run multiple instances of the shop server by providing different port numbers and shop names.
