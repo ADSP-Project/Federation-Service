@@ -7,4 +7,5 @@ const MainPage = ({ shops }) => (
   </ShopTileContainer>
 );
 
+
 export default MainPage;

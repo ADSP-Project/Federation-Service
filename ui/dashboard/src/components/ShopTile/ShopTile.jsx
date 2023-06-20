@@ -1,9 +1,9 @@
-import { Tile, TileHeader, TileBody, TileFooter, JoinButton, Image } from './ShopTile.styles';
+import { Tile, TileHeader, TileBody, TileFooter, JoinButton } from './ShopTile.styles';
 
 const ShopTile = ({ shop }) => (
   <Tile>
     <TileHeader>{shop.name}</TileHeader>
-    <TileBody>{shop.description}</TileBody>
+    <TileBody>{shop.webhookURL}</TileBody>
     <TileFooter>
       <JoinButton>Join</JoinButton>
     </TileFooter>
