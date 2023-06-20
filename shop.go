@@ -2,9 +2,11 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
+	"database/sql"
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
@@ -13,10 +15,9 @@ import (
 	"net/url"
 	"os"
 	"time"
-	"database/sql"
+
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-
 
 	"github.com/gorilla/mux"
 )
@@ -24,7 +25,7 @@ import (
 type Shop struct {
 	Name       string `json:"name"`
 	WebhookURL string `json:"webhookURL"`
-	PublicKey string `json:"publicKey"`
+	PublicKey  string `json:"publicKey"`
 }
 
 var federationServer = "http://localhost:8000"
@@ -40,10 +41,22 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/webhook", handleWebhook).Methods("POST")
 
-	go joinFederation(shopName)
-	go pollFederationServer()
+	httpServer := &http.Server{Addr: fmt.Sprintf(":%s", port), Handler: router}
+	go func() {
+		if err := httpServer.ListenAndServe(); err != nil {
+			log.Fatal(err)
+		}
+	}()
 
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), router))
+	joinFederation(shopName)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := httpServer.Shutdown(ctx); err != nil {
+		log.Fatalf("Server shutdown failed:%+v", err)
+	}
+	log.Printf("Shop has been created!")
 }
 
 func dbConn() (db *sql.DB) {
@@ -63,10 +76,9 @@ func dbConn() (db *sql.DB) {
 	if err != nil {
 		panic(err.Error())
 	}
-	
+
 	return db
 }
-
 
 func handleWebhook(w http.ResponseWriter, r *http.Request) {
 	var newShop Shop
@@ -121,6 +133,7 @@ func joinFederation(shopName string) {
 	defer resp.Body.Close()
 
 	fmt.Println("Shop joined the federation")
+	os.Exit(0)
 }
 
 func pollFederationServer() {
@@ -150,4 +163,3 @@ func pollFederationServer() {
 		fmt.Printf("Current shops in the federation: %v\n", shops)
 	}
 }
-
