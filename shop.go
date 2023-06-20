@@ -13,6 +13,10 @@ import (
 	"net/url"
 	"os"
 	"time"
+	"database/sql"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
+
 
 	"github.com/gorilla/mux"
 )
@@ -41,6 +45,28 @@ func main() {
 
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), router))
 }
+
+func dbConn() (db *sql.DB) {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+
+	dbDriver := "postgres"
+	dbUser := os.Getenv("DB_USER")
+	dbPass := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
+
+	dbInfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", dbUser, dbPass, dbName)
+
+	db, err = sql.Open(dbDriver, dbInfo)
+	if err != nil {
+		panic(err.Error())
+	}
+	
+	return db
+}
+
 
 func handleWebhook(w http.ResponseWriter, r *http.Request) {
 	var newShop Shop
@@ -98,6 +124,9 @@ func joinFederation(shopName string) {
 }
 
 func pollFederationServer() {
+	db := dbConn()
+	defer db.Close()
+
 	for {
 		time.Sleep(10 * time.Second)
 
@@ -110,6 +139,15 @@ func pollFederationServer() {
 		var shops []Shop
 		json.NewDecoder(resp.Body).Decode(&shops)
 
+		for _, shop := range shops {
+			insForm, err := db.Prepare("INSERT INTO shops(name, webhookURL, publicKey) VALUES($1,$2,$3)")
+			if err != nil {
+				panic(err.Error())
+			}
+			insForm.Exec(shop.Name, shop.WebhookURL, shop.PublicKey)
+		}
+
 		fmt.Printf("Current shops in the federation: %v\n", shops)
 	}
 }
+

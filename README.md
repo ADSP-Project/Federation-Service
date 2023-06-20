@@ -28,7 +28,31 @@ This repository contains the code for setting up a federated marketplace using G
    
       `go mod download`
 
-3. Simulate a shop joining the federation:
+
+3. Configure environment variables:
+
+   - Rename the .env.example file to .env.
+   - Update the database credentials in the .env file to match your PostgreSQL setup.
+
+4. If you set already Hub up, then you have your user already with a password. Connect to Postgres with `psql` and create new database 'federation_service':
+
+      `CREATE DATABASE federation_service;`
+   
+   Grant rights to your user:
+
+      `GRANT ALL PRIVILEGES ON DATABASE federation_service TO your_username;`
+
+5. Now connect as your user to DB for creating tables:
+   
+      `psql -d federation_service -U your_username`
+
+   Create tables `shops` and `partners`:
+
+      `CREATE TABLE shops ( id SERIAL PRIMARY KEY, name VARCHAR(255) UNIQUE, webhookURL VARCHAR(255), publicKey VARCHAR(1024));`
+
+      `CREATE TABLE partners ( shopId SERIAL PRIMARY KEY, shopName VARCHAR(255), canEarnCommission BOOLEAN, canShareInventory BOOLEAN, canShareData BOOLEAN, canCoPromote BOOLEAN, canSell BOOLEAN, publicKey VARCHAR(1024));`
+
+6. Simulate a shop joining the federation:
    - To simulate a shop joining the federation, open a new terminal and run the following command:
 
      `go run shop.go [port] [name]`
@@ -39,5 +63,5 @@ This repository contains the code for setting up a federated marketplace using G
 
      **Important:** Hub and AuthServer from Federation-Hub should be running so that shop can join Federation.
 
-4. Additional Notes:
+7. Additional Notes:
    - You can run multiple instances of the shop server by providing different port numbers and shop names.
