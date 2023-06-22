@@ -16,16 +16,35 @@ import (
 	"os"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-
-	"github.com/gorilla/mux"
 )
+
+// Private key needs to be saved somewhere else for Production for example in .env or in a file
+var globalPrivKey rsa.PrivateKey
 
 type Shop struct {
 	Name       string `json:"name"`
 	WebhookURL string `json:"webhookURL"`
 	PublicKey  string `json:"publicKey"`
+}
+
+type JWT struct {
+	SigningString string
+	Secret        string
+}
+
+type Partner struct {
+	JWTToken          JWT
+	Name              string `json:"name"`
+	CanEarnCommission bool   `json:"comm"`
+	CanShareInventory bool   `json:"shareInv"`
+	CanShareData      bool   `json:"shareData"`
+	CanCoPromote      bool   `json:"promote"`
+	CanSell           bool   `json:"sell"`
+	PublicKey         string `json:"publicKey"`
 }
 
 var federationServer = "http://localhost:8000"
@@ -40,6 +59,7 @@ func main() {
 
 	router := mux.NewRouter()
 	router.HandleFunc("/webhook", handleWebhook).Methods("POST")
+	router.HandleFunc("/partner", handlePartner).Methods("POST")
 
 	httpServer := &http.Server{Addr: fmt.Sprintf(":%s", port), Handler: router}
 	go func() {
@@ -80,6 +100,63 @@ func dbConn() (db *sql.DB) {
 	return db
 }
 
+func GetJWT() (string, error) {
+	token := jwt.New(jwt.SigningMethodRS256)
+
+	claims := token.Claims.(jwt.MapClaims)
+
+	claims["authorized"] = true
+	claims["client"] = "shop"
+	claims["aud"] = "test"
+	claims["iss"] = "shop"
+	claims["exp"] = time.Now().Add(time.Minute * 120).Unix()
+
+	tokenString, err := token.SignedString(globalPrivKey)
+
+	if err != nil {
+		fmt.Errorf("Something Went Wrong: %s", err.Error())
+		return "", err
+	}
+
+	return tokenString, nil
+}
+
+func sendRequest(webhookURL string, port string) {
+	validToken, err := GetJWT()
+	fmt.Println(validToken)
+	if err != nil {
+		fmt.Println("Failed to generate token")
+	}
+	jsonData, _ := json.Marshal(validToken)
+
+	// resp, err := http.Post(webhookURL, "application/json", bytes.NewBuffer(jsonData))
+	// http.NewRequest("POST", webhookURL, bytes.NewBuffer(jsonData))
+
+	if err != nil {
+		log.Printf("Failed to send webhook to %s: %v\n", webhookURL, err)
+		return
+	}
+	// defer resp.Body.Close()
+
+}
+
+func handlePartner(w http.ResponseWriter, r *http.Request) {
+	db := dbConn()
+	defer db.Close()
+
+	var partnerRequest Partner
+	json.NewDecoder(r.Body).Decode(&partnerRequest)
+	//TODO Check JWT validity
+
+	//Inserting into database partners
+	insForm, err := db.Prepare("INSERT INTO partners(shopName, canEarnCommission, canShareInventory, canShareData, canCoPromote, canSell, publicKey) VALUES($1,$2,$3,$4,$5,$6,$7)")
+	if err != nil {
+		panic(err.Error())
+	}
+	insForm.Exec(partnerRequest.Name, partnerRequest.CanEarnCommission, partnerRequest.CanShareInventory, partnerRequest.CanShareData, partnerRequest.CanCoPromote, partnerRequest.CanSell, partnerRequest.PublicKey)
+
+}
+
 func handleWebhook(w http.ResponseWriter, r *http.Request) {
 	var newShop Shop
 	json.NewDecoder(r.Body).Decode(&newShop)
@@ -102,6 +179,10 @@ func exportPrivateKeyAsPemStr(privatekey *rsa.PrivateKey) string {
 func joinFederation(shopName string) {
 
 	privKey, err := rsa.GenerateKey(rand.Reader, 128)
+
+	//for authentication in GetJWT func
+	globalPrivKey = *privKey
+
 	privatekey_pem := exportPrivateKeyAsPemStr(privKey)
 	PublicKey := exportPublicKeyAsPemStr(&privKey.PublicKey)
 
