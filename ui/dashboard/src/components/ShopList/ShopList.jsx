@@ -1,4 +1,4 @@
-import { Table, Button } from "./ShopList.styles";
+import { Table, Button, DeniedButton } from "./ShopList.styles";
 
 const ShopList = ({ shops }) => (
   <Table>
@@ -18,6 +18,14 @@ const ShopList = ({ shops }) => (
           </td>
         </tr>
       ))}
+      <tr key="0"> 
+        <td>Demo-Shop</td>
+        <td>
+          <Button>Allow item sale</Button> 
+          <DeniedButton>Allow commission</DeniedButton>
+          <DeniedButton>Allow data sharing</DeniedButton>
+        </td>
+      </tr>
     </tbody>
   </Table>
 );

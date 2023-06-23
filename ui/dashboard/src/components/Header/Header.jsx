@@ -7,6 +7,7 @@ const Header = () => (
     </Link>
     <Navigation>
       <Link href="/partners">Partners</Link>
+      <Link href="/statistics">Statistics</Link>
     </Navigation>
     <LoginButton>Login</LoginButton>
   </HeaderContainer>

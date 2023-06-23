@@ -24,13 +24,3 @@ export const Button = styled.button`
   cursor: pointer;
   margin-right: 0.5em;
 `;
-
-export const DeniedButton = styled.button`
-  background-color: #007bff;
-  color: red;
-  border: none;
-  padding: 0.5em 1em;
-  border-radius: 0.25em;
-  cursor: pointer;
-  margin-right: 0.5em;
-`;

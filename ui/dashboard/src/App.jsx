@@ -5,6 +5,7 @@ import ShopList from './components/ShopList';
 import MainPage from './components/MainPage';
 import GlobalStyles from './globalStyles';
 import React, { useState, useEffect } from 'react';
+import Statistics from './components/Statistics';
 
 function App() {
   
@@ -27,6 +28,7 @@ function App() {
         <Layout>
           <Routes>
             <Route path="/partners" element={<ShopList shops={shops} />}/>
+            <Route path="/statistics" element={<Statistics shops={shops} />}/>
             <Route path="/" element={<MainPage shops={shops} />} />
           </Routes>
         </Layout>
