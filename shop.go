@@ -59,7 +59,7 @@ func main() {
 
 	router := mux.NewRouter()
 	router.HandleFunc("/webhook", handleWebhook).Methods("POST")
-	router.HandleFunc("/partner", handlePartner).Methods("POST")
+	router.HandleFunc("/partner", handlePartnerRequest).Methods("POST")
 
 	httpServer := &http.Server{Addr: fmt.Sprintf(":%s", port), Handler: router}
 	go func() {
@@ -121,33 +121,53 @@ func GetJWT() (string, error) {
 	return tokenString, nil
 }
 
-func sendRequest(webhookURL string, port string) {
+//func receiveRequest()
+
+func sendPartnerRequest(webhookURL string, port string) {
 	validToken, err := GetJWT()
 	fmt.Println(validToken)
 	if err != nil {
 		fmt.Println("Failed to generate token")
 	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
 	jsonData, _ := json.Marshal(validToken)
 
-	// resp, err := http.Post(webhookURL, "application/json", bytes.NewBuffer(jsonData))
-	// http.NewRequest("POST", webhookURL, bytes.NewBuffer(jsonData))
-
+	// Define Request
+	req, err := http.NewRequestWithContext(ctx, "POST", webhookURL, bytes.NewReader(jsonData))
 	if err != nil {
-		log.Printf("Failed to send webhook to %s: %v\n", webhookURL, err)
+		log.Printf("Failed to send PartnerRequest to %s: %v\n", webhookURL, err)
 		return
 	}
-	// defer resp.Body.Close()
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Token", validToken)
+
+	// Now call the server with Request
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		log.Printf("Bad status: %d %s", resp.StatusCode, resp.Status)
+		return
+	}
+
+	defer resp.Body.Close()
 
 }
 
-func handlePartner(w http.ResponseWriter, r *http.Request) {
+func handlePartnerRequest(w http.ResponseWriter, r *http.Request) {
 	db := dbConn()
 	defer db.Close()
 
 	var partnerRequest Partner
 	json.NewDecoder(r.Body).Decode(&partnerRequest)
 	//TODO Check JWT validity
-
+	// jwt.Token
+	partnerRequest.JWTToken.Secret
 	//Inserting into database partners
 	insForm, err := db.Prepare("INSERT INTO partners(shopName, canEarnCommission, canShareInventory, canShareData, canCoPromote, canSell, publicKey) VALUES($1,$2,$3,$4,$5,$6,$7)")
 	if err != nil {
