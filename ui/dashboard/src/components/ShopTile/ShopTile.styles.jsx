@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import Select from 'react-select';
 
 export const Tile = styled.div`
   border: 1px solid #ddd;
@@ -38,6 +39,7 @@ export const JoinButton = styled.button`
 
 export const Image = styled.img`
   width: 100%;
-  height: auto;
+  height: 300px;  
   object-fit: cover;
+  object-position: center;
 `;
