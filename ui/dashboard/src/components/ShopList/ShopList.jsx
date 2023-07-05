@@ -29,7 +29,7 @@ const ShopList = () => {
   }, []);
 
   const pendingPartners = partners.filter(partner => partner.requestStatus === 'pending');
-  const establishedPartners = partners.filter(partner => partner.requestStatus !== 'pending');
+  const establishedPartners = partners.filter(partner => partner.requestStatus === 'approved');
 
   console.log(partners)
 
