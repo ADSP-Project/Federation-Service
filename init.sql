@@ -13,5 +13,5 @@ CREATE TABLE partners (
   canShareData BOOLEAN,
   canCoPromote BOOLEAN,
   canSell BOOLEAN,
-  publicKey VARCHAR(1024)
+  requestStatus VARCHAR(255)
 );
