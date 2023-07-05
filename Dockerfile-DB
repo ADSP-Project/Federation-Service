@@ -8,9 +8,4 @@ ENV POSTGRES_DB federation_service
 # Copy initialization scripts to docker-entrypoint-initdb.d
 COPY init.sql /docker-entrypoint-initdb.d/
 
-# Grant all privileges to the user
-RUN echo "GRANT ALL PRIVILEGES ON DATABASE federation_service TO user;" >> /docker-entrypoint-initdb.d/init.sql
-RUN echo "ALTER USER user CREATEDB;" >> /docker-entrypoint-initdb.d/init.sql
-
-# Expose the PostgreSQL port
 EXPOSE 5432

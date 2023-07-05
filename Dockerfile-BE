@@ -4,4 +4,4 @@ COPY . .
 RUN go mod init github.com/ADSP-Project/Federation-Service
 RUN go mod tidy
 RUN go mod download
-ENTRYPOINT ["go", "run", "shop.go", "[port]", "[name]"]
+ENTRYPOINT ["go", "run", "shop.go", "3002", "shop"]
