@@ -4,16 +4,21 @@ import Header from './components/Header';
 import ShopList from './components/ShopList';
 import MainPage from './components/MainPage';
 import GlobalStyles from './globalStyles';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 function App() {
   
   const [shops, setShops] = useState([]);
 
+  const MY_WEBHOOK_URL = "http://localhost:8091/webhook";
+
   useEffect(() => {
-    fetch('http://localhost:8000/shops')
+    fetch('http://localhost:8091/api/v1/shops')
       .then(response => response.json())
-      .then(data => setShops(data))
+      .then(data => {
+        const filteredShops = data.filter(shop => shop.WebhookURL !== MY_WEBHOOK_URL);
+        setShops(filteredShops);
+      })
       .catch((error) => {
         console.error('Error:', error);
       });
@@ -26,8 +31,8 @@ function App() {
         <Header />
         <Layout>
           <Routes>
-            <Route path="/partners" element={<ShopList shops={shops} />}/>
             <Route path="/" element={<MainPage shops={shops} />} />
+            <Route path="/partners" element={<ShopList shops={shops} />}/>
           </Routes>
         </Layout>
       </div>

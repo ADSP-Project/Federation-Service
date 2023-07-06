@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -19,8 +20,23 @@ import (
 )
 
 func ProcessPartnership(w http.ResponseWriter, r *http.Request) {
-    var request types.PartnershipProcessRequest
-    json.NewDecoder(r.Body).Decode(&request)
+    var request types.PartnershipRequest
+
+	bodyBytes, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	bodyString := string(bodyBytes)
+	fmt.Println(bodyString)  // prints the actual request body
+
+	// you need to put back the body content into the request
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+
+	err = json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error decoding JSON: %v", err), http.StatusBadRequest)
+		return
+	}
     
 	authorizationHeader := r.Header.Get("Authorization")
 	if authorizationHeader == "" {
@@ -79,13 +95,21 @@ func ProcessPartnership(w http.ResponseWriter, r *http.Request) {
 		db := database.DbConn()
 		shopId := claims["shopId"].(string)
 		partnerId := claims["partnerId"].(string)
+
+		partner, err := database.GetShopById(partnerId)
+		if err != nil {
+			log.Printf("Failed to get shop with id %s: %v\n", shopId, err)
+			http.Error(w, "Failed to process partnership", http.StatusInternalServerError)
+			return
+		}
 	
 		// Insert new partnership entry
 		sqlStatement := `
 			INSERT INTO partners (shopid, shopname, canearncommission, canshareinventory, cansharedata, cancopromote, cansell, requeststatus)
 			VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending')
 		`
-		_, err := db.Exec(sqlStatement, shopId, partnerId, request.Rights.CanEarnCommission, request.Rights.CanShareInventory, request.Rights.CanShareData, request.Rights.CanCoPromote, request.Rights.CanSell)
+		fmt.Print(request.Rights)
+		_, err = db.Exec(sqlStatement, partnerId, partner.Name, request.Rights.CanEarnCommission, request.Rights.CanShareInventory, request.Rights.CanShareData, request.Rights.CanCoPromote, request.Rights.CanSell)
 		if err != nil {
 			log.Printf("Failed to insert new partnership: %v\n", err)
 			http.Error(w, "Failed to process partnership", http.StatusInternalServerError)
@@ -137,10 +161,7 @@ func RequestPartnership(w http.ResponseWriter, r *http.Request, privKey *rsa.Pri
 
 	newURL := url.String() 
 
-    bodyData := map[string]string{
-        "shopId": request.ShopId,
-    }
-    jsonData, err := json.Marshal(bodyData)
+	jsonData, err := json.Marshal(request)
     if err != nil {
         http.Error(w, "Failed to create JSON body", http.StatusInternalServerError)
         return
@@ -153,6 +174,7 @@ func RequestPartnership(w http.ResponseWriter, r *http.Request, privKey *rsa.Pri
     }
     req.Header.Set("Content-Type", "application/json")
     req.Header.Set("Authorization", "Bearer "+tokenString)
+	fmt.Printf("Parsed request: %+v\n", request)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)

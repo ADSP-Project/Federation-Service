@@ -3,7 +3,7 @@ import { ShopTileContainer } from "./MainPage.styles"
 
 const MainPage = ({ shops }) => (
   <ShopTileContainer>
-    {shops && shops.map(shop => <ShopTile key={shop.id} shop={shop} />)}
+    {shops && shops.map(shop => <ShopTile key={shop.Id} shop={shop} />)}
   </ShopTileContainer>
 );
 
