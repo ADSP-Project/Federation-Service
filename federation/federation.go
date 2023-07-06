@@ -2,17 +2,17 @@ package federation
 
 import (
 	"bytes"
+	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
+	"io/ioutil"
 	"log"
-	mathrand "math/rand"
 	"net/http"
 	"net/url"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/ADSP-Project/Federation-Service/database"
@@ -33,27 +33,61 @@ func ExportPrivateKeyAsPemStr(privatekey *rsa.PrivateKey) string {
 }
 
 func JoinFederation(shopName string, shopDescription string) *rsa.PrivateKey {
+	var privKey *rsa.PrivateKey
+	var err error
+	privateKeyFile := "private.pem"
+	
+	// Check if the key file already exists
+	if _, err := os.Stat(privateKeyFile); os.IsNotExist(err) {
+		// Key file doesn't exist, so we generate a new private key
+		privKey, err = rsa.GenerateKey(rand.Reader, 2048)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	seed, err := strconv.Atoi(os.Args[1])
-    if err != nil {
-        log.Fatal(err)
-    }
+		privateKeyPem := pem.EncodeToMemory(&pem.Block{
+			Type:  "RSA PRIVATE KEY",
+			Bytes: x509.MarshalPKCS1PrivateKey(privKey),
+		})
 
-	randomSource := mathrand.New(mathrand.NewSource(int64(seed)))
+		// Save the PEM-encoded private key to a file.
+		err = ioutil.WriteFile(privateKeyFile, privateKeyPem, 0600)
+		if err != nil {
+			log.Fatalf("Error writing key to file: %s", err)
+		}
 
-	privKey, err := rsa.GenerateKey(randomSource, 2048)
-	// ExportPrivateKeyAsPemStr(privKey)
+	} else {
+		// Key file exists, load the PEM-encoded private key from the file.
+		privateKeyPem, err := ioutil.ReadFile(privateKeyFile)
+		if err != nil {
+			log.Fatalf("Error reading key from file: %s", err)
+		}
+
+		// Parse the PEM block.
+		block, _ := pem.Decode(privateKeyPem)
+		if block == nil || block.Type != "RSA PRIVATE KEY" {
+			log.Fatalf("Failed to decode PEM block containing private key")
+		}
+
+		// Parse the private key.
+		privKey, err = x509.ParsePKCS1PrivateKey(block.Bytes)
+		if err != nil {
+			log.Fatalf("Failed to parse private key: %s", err)
+		}
+	}
+
+	privatekey_pem := ExportPrivateKeyAsPemStr(privKey)
 	PublicKey := ExportPublicKeyAsPemStr(&privKey.PublicKey)
 
 	newShop := types.Shop{
-		Name:        shopName, 
-		WebhookURL:  fmt.Sprintf("http://localhost:%s/webhook", os.Args[1]), 
-		PublicKey:   PublicKey, 
+		Name:        shopName,
+		WebhookURL:  fmt.Sprintf("http://localhost:%s/webhook", os.Args[1]),
+		PublicKey:   PublicKey,
 		Description: shopDescription,
 	}
 
-	// log.Printf("New Shop Private Key is \n %s", privatekey_pem)
-	// log.Printf("New Shop Public key is \n %s", newShop.PublicKey)
+	log.Printf("New Shop Private Key is \n %s", privatekey_pem)
+	log.Printf("New Shop Public key is \n %s", newShop.PublicKey)
 
 	resp, err := http.PostForm(globals.AuthServer+"/login", url.Values{"name": {shopName}, "webhookURL": {newShop.WebhookURL}, "publicKey": {newShop.PublicKey}})
 	if err != nil {
@@ -81,6 +115,7 @@ func JoinFederation(shopName string, shopDescription string) *rsa.PrivateKey {
 
 	return privKey
 }
+
 
 func PollFederationServer() {
 	db := database.DbConn()
