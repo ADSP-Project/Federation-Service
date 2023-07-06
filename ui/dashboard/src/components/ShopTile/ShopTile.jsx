@@ -19,7 +19,7 @@ const ShopTile = ({ shop }) => {
 
   useEffect(() => {
     const fetchShopData = async () => {
-      const res = await fetch('http://localhost:8091/api/v1/shop');
+      const res = await fetch(`${import.meta.env.VITE_FEDERATION_SERVICE}/api/v1/shop`);
       const data = await res.json();
       setCurrentShop(data);
     };
@@ -28,7 +28,7 @@ const ShopTile = ({ shop }) => {
 
   useEffect(() => {
     const fetchPartnersData = async () => {
-      const res = await fetch('http://localhost:8091/api/v1/partners');
+      const res = await fetch(`${import.meta.env.VITE_FEDERATION_SERVICE}/api/v1/partners`);
       const data = await res.json();
       setPartners(data);
     };
@@ -51,7 +51,7 @@ const ShopTile = ({ shop }) => {
       Rights: selectedRights
     };
   
-    const res = await fetch('http://localhost:8091/api/v1/partnerships/request', {
+    const res = await fetch(`${import.meta.env.VITE_FEDERATION_SERVICE}/api/v1/partnerships/request`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
