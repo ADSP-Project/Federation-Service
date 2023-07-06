@@ -3,4 +3,4 @@ FROM node:16
 COPY . .
 WORKDIR /ui/dashboard
 RUN npm install
-RUN npm run dev
+CMD [ "npm","run","dev" ] 
