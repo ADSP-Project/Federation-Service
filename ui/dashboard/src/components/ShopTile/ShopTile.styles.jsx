@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import Select from 'react-select';
 
 export const Tile = styled.div`
   border: 1px solid #ddd;
@@ -35,6 +34,11 @@ export const JoinButton = styled.button`
   font-size: 16px;
   margin: 4px 2px;
   cursor: pointer;
+
+  &:disabled {
+    background-color: gray; 
+    cursor: not-allowed;
+  }
 `;
 
 export const Image = styled.img`

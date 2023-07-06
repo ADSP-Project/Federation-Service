@@ -20,7 +20,7 @@ func GetPartners(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
-	var partners []types.Partner
+	partners := make([]types.Partner, 0) // Initialize partners as empty slice
 	for rows.Next() {
 		var p types.Partner
 		if err := rows.Scan(&p.ShopId, &p.ShopName, &p.Rights.CanEarnCommission, &p.Rights.CanSell, &p.Rights.CanShareData, &p.Rights.CanShareInventory, &p.Rights.CanCoPromote, &p.RequestStatus); err != nil {

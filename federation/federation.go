@@ -1,24 +1,25 @@
 package federation
 
 import (
-	"github.com/ADSP-Project/Federation-Service/types"
-	"github.com/ADSP-Project/Federation-Service/database"
 	"bytes"
-	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
 	"log"
+	mathrand "math/rand"
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"time"
+
+	"github.com/ADSP-Project/Federation-Service/database"
+	"github.com/ADSP-Project/Federation-Service/globals"
+	"github.com/ADSP-Project/Federation-Service/types"
 	_ "github.com/lib/pq"
 )
-
-var federationServer = "http://localhost:8000"
 
 func ExportPublicKeyAsPemStr(pubkey *rsa.PublicKey) string {
 	PublicKey := string(pem.EncodeToMemory(&pem.Block{Type: "RSA PUBLIC KEY", Bytes: x509.MarshalPKCS1PublicKey(pubkey)}))
@@ -33,8 +34,15 @@ func ExportPrivateKeyAsPemStr(privatekey *rsa.PrivateKey) string {
 
 func JoinFederation(shopName string, shopDescription string) *rsa.PrivateKey {
 
-	privKey, err := rsa.GenerateKey(rand.Reader, 2048)
-	privatekey_pem := ExportPrivateKeyAsPemStr(privKey)
+	seed, err := strconv.Atoi(os.Args[1])
+    if err != nil {
+        log.Fatal(err)
+    }
+
+	randomSource := mathrand.New(mathrand.NewSource(int64(seed)))
+
+	privKey, err := rsa.GenerateKey(randomSource, 2048)
+	// ExportPrivateKeyAsPemStr(privKey)
 	PublicKey := ExportPublicKeyAsPemStr(&privKey.PublicKey)
 
 	newShop := types.Shop{
@@ -44,10 +52,10 @@ func JoinFederation(shopName string, shopDescription string) *rsa.PrivateKey {
 		Description: shopDescription,
 	}
 
-	log.Printf("New Shop Private Key is \n %s", privatekey_pem)
-	log.Printf("New Shop Public key is \n %s", newShop.PublicKey)
+	// log.Printf("New Shop Private Key is \n %s", privatekey_pem)
+	// log.Printf("New Shop Public key is \n %s", newShop.PublicKey)
 
-	resp, err := http.PostForm("http://localhost:8081/login", url.Values{"name": {shopName}, "webhookURL": {newShop.WebhookURL}, "publicKey": {newShop.PublicKey}})
+	resp, err := http.PostForm(globals.AuthServer+"/login", url.Values{"name": {shopName}, "webhookURL": {newShop.WebhookURL}, "publicKey": {newShop.PublicKey}})
 	if err != nil {
 		log.Fatal("Failed to authenticate with auth server")
 	}
@@ -59,7 +67,7 @@ func JoinFederation(shopName string, shopDescription string) *rsa.PrivateKey {
 	accessToken := result["access_token"]
 
 	jsonData, _ := json.Marshal(newShop)
-	req, err := http.NewRequest("POST", federationServer+"/shops", bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest("POST", globals.FederationServer+"/shops", bytes.NewBuffer(jsonData))
 	req.Header.Set("Authorization", accessToken)
 
 	resp, err = http.DefaultClient.Do(req)
@@ -81,7 +89,7 @@ func PollFederationServer() {
 	for {
 		time.Sleep(10 * time.Second)
 
-		resp, err := http.Get(federationServer + "/shops")
+		resp, err := http.Get(globals.FederationServer + "/shops")
 		if err != nil {
 			log.Printf("Failed to poll federation server: %v\n", err)
 			continue
@@ -100,7 +108,7 @@ func PollFederationServer() {
 			shopsDisplay = append(shopsDisplay, types.ShopDisplay{Name: shop.Name, WebhookURL: shop.WebhookURL})
 		}
 
-		shopsDisplayJSON, _ := json.MarshalIndent(shopsDisplay, "", "    ")
-		fmt.Printf("Current shops in the federation: \n%s\n", string(shopsDisplayJSON))
+		// shopsDisplayJSON, _ := json.MarshalIndent(shopsDisplay, "", "    ")
+		// fmt.Printf("Current shops in the federation: \n%s\n", string(shopsDisplayJSON))
 	}
 }

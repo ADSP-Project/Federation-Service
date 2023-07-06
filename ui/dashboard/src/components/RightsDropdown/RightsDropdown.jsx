@@ -18,15 +18,12 @@ const RightsChip = ({ option, selected, onClick }) => {
   );
 };
   
-const RightsDropdown = ({ options }) => {
-  const [selectedRights, setSelectedRights] = useState([]);
-
+const RightsDropdown = ({ options, setSelectedRights, selectedRights }) => {
   const handleClick = (option) => {
-    setSelectedRights(prevState =>
-      prevState.includes(option)
-        ? prevState.filter(o => o !== option)
-        : [...prevState, option]
-    );
+    setSelectedRights(prevRights => ({
+      ...prevRights,
+      [option]: !prevRights[option]
+    }));
   };
 
   return (
@@ -35,7 +32,7 @@ const RightsDropdown = ({ options }) => {
         <RightsChip
           key={option}
           option={option}
-          selected={selectedRights.includes(option)}
+          selected={selectedRights[option]}
           onClick={() => handleClick(option)}
         />
       ))}

@@ -24,6 +24,14 @@ type Partner struct {
 	RequestStatus string `json:"requestStatus"`
 }
 
+type Rights struct {
+	CanEarnCommission bool `json:"canEarnCommission"`
+	CanSell           bool `json:"canSell"`
+	CanShareData      bool `json:"canShareData"`
+	CanShareInventory bool `json:"canShareInventory"`
+	CanCoPromote      bool `json:"canCoPromote"`
+}
+
 type ShopDisplay struct {
 	Name       string `json:"name"`
 	WebhookURL string `json:"webhookURL"`
@@ -32,19 +40,7 @@ type ShopDisplay struct {
 type PartnershipRequest struct {
 	ShopId     string   `json:"shopId"`
 	PartnerId  string   `json:"partnerId"`
-	Rights     []string `json:"rights"`
-}
-
-type PartnershipProcessRequest struct {
-	ShopId string   `json:"shopId"`
-	Jwt    string   `json:"jwt"`
-	Rights struct {
-		CanEarnCommission  bool `json:"canEarnCommission"`
-		CanShareInventory  bool `json:"canShareInventory"`
-		CanShareData       bool `json:"canShareData"`
-		CanCoPromote       bool `json:"canCoPromote"`
-		CanSell            bool `json:"canSell"`
-	} `json:"rights"`
+	Rights Rights `json:"rights"`
 }
 
 type tokenClaims struct {
