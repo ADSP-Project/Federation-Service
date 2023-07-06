@@ -48,14 +48,14 @@ This repository contains the code for setting up a federated marketplace using G
 
    Create tables `shops` and `partners`:
 
-      `CREATE TABLE shops ( id SERIAL PRIMARY KEY, name VARCHAR(255) UNIQUE, webhookURL VARCHAR(255), publicKey VARCHAR(1024));`
+      `CREATE TABLE shops ( id SERIAL PRIMARY KEY, name VARCHAR(255) UNIQUE, description VARCHAR(255), webhookURL VARCHAR(255), publicKey VARCHAR(1024));`
 
-      `CREATE TABLE partners ( shopId SERIAL PRIMARY KEY, shopName VARCHAR(255), canEarnCommission BOOLEAN, canShareInventory BOOLEAN, canShareData BOOLEAN, canCoPromote BOOLEAN, canSell BOOLEAN, publicKey VARCHAR(1024));`
+      `CREATE TABLE partners ( shopId SERIAL PRIMARY KEY, shopName VARCHAR(255), canEarnCommission BOOLEAN, canShareInventory BOOLEAN, canShareData BOOLEAN, canCoPromote BOOLEAN, canSell BOOLEAN, requestStatus VARCHAR(1024));`
 
 6. Simulate a shop joining the federation:
    - To simulate a shop joining the federation, open a new terminal and run the following command:
 
-     `go run shop.go [port] [name]`
+     `go run shop.go [port] [name] [description]`
 
      Replace `[port]` with the desired port number and `[name]` with the name of the shop.
 
