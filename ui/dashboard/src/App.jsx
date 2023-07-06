@@ -9,11 +9,12 @@ import { useState, useEffect } from 'react';
 function App() {
   
   const [shops, setShops] = useState([]);
+  console.log(import.meta.env.VITE_FEDERATION_SERVICE)
 
-  const MY_WEBHOOK_URL = "http://localhost:8091/webhook";
+  const MY_WEBHOOK_URL = `${import.meta.env.VITE_FEDERATION_SERVICE}/webhook`;
 
   useEffect(() => {
-    fetch('http://localhost:8091/api/v1/shops')
+    fetch(`${import.meta.env.VITE_FEDERATION_SERVICE}/api/v1/shops`)
       .then(response => response.json())
       .then(data => {
         const filteredShops = data.filter(shop => shop.WebhookURL !== MY_WEBHOOK_URL);

@@ -23,7 +23,7 @@ const ShopList = () => {
   const [partners, setPartners] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:8091/api/v1/partners')
+    fetch(`${import.meta.env.VITE_FEDERATION_SERVICE}/api/v1/partners`)
       .then(response => response.json())
       .then(data => setPartners(data));
   }, []);
