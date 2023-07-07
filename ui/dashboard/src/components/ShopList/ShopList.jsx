@@ -19,6 +19,23 @@ const Rights = ({ rights }) => (
   </div>
 );
 
+const handleAcceptButtonClick = async () => {
+  const partnershipRequest = {
+    ShopId: currentShop.Id, 
+
+  };
+
+  const res = await fetch(`${import.meta.env.VITE_FEDERATION_SERVICE}/api/v1/partnerships/accept`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(partnershipRequest)
+  });
+
+  
+};
+
 const ShopList = () => {
   const [partners, setPartners] = useState([]);
 
@@ -52,7 +69,7 @@ const ShopList = () => {
               <td>{partner.shopName}</td>
               <td><Rights rights={partner.rights} /></td>
               <td>
-                <Button>Approve</Button>
+                <Button onClick={handleAcceptButtonClick}>Approve</Button>
                 <Button>Deny</Button>
               </td>
             </tr>
