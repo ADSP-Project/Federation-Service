@@ -50,6 +50,8 @@ const ShopTile = ({ shop }) => {
       PartnerId: shop.Id,
       Rights: selectedRights
     };
+
+
   
     const res = await fetch(`${import.meta.env.VITE_FEDERATION_SERVICE}/api/v1/partnerships/request`, {
       method: 'POST',
