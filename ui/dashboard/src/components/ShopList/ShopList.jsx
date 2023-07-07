@@ -19,10 +19,9 @@ const Rights = ({ rights }) => (
   </div>
 );
 
-const handleAcceptButtonClick = async () => {
+const handleAcceptButtonClick = async (partner) => {
   const partnershipRequest = {
-    ShopId: currentShop.Id, 
-
+    shopName: partner.shopName, 
   };
 
   const res = await fetch(`${import.meta.env.VITE_FEDERATION_SERVICE}/api/v1/partnerships/accept`, {
@@ -31,9 +30,21 @@ const handleAcceptButtonClick = async () => {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify(partnershipRequest)
-  });
+  });  
+};
 
-  
+const handleDenyButtonClick = async (partner) => {
+  const partnershipRequest = {
+    shopName: partner.Name, 
+  };
+
+  const res = await fetch(`${import.meta.env.VITE_FEDERATION_SERVICE}/api/v1/partnerships/deny`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(partnershipRequest)
+  });  
 };
 
 const ShopList = () => {
@@ -46,7 +57,8 @@ const ShopList = () => {
   }, []);
 
   const pendingPartners = partners.filter(partner => partner.requestStatus === 'pending');
-  const establishedPartners = partners.filter(partner => partner.requestStatus === 'approved');
+  const establishedPartners = partners.filter(partner => partner.requestStatus === 'accepted');
+  const requestedPartners = partners.filter(partner => partner.requestStatus === 'sent');
 
   console.log(partners)
 
@@ -69,8 +81,8 @@ const ShopList = () => {
               <td>{partner.shopName}</td>
               <td><Rights rights={partner.rights} /></td>
               <td>
-                <Button onClick={handleAcceptButtonClick}>Approve</Button>
-                <Button>Deny</Button>
+                <Button onClick={() => handleAcceptButtonClick(partner)}>Approve</Button>
+                <Button onClick={() => handleDenyButtonClick(partner)}>Deny</Button>
               </td>
             </tr>
           ))}
@@ -88,6 +100,26 @@ const ShopList = () => {
         </thead>
         <tbody>
           {establishedPartners.map(partner => (
+            <tr key={partner.shopId}>
+              <td>{partner.shopId}</td>
+              <td>{partner.shopName}</td>
+              <td><Rights rights={partner.rights} /></td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+
+      <h2>Partnership requests sent</h2>
+      <Table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Rights</th>
+          </tr>
+        </thead>
+        <tbody>
+          {requestedPartners.map(partner => (
             <tr key={partner.shopId}>
               <td>{partner.shopId}</td>
               <td>{partner.shopName}</td>
