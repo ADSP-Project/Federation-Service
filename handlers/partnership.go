@@ -124,7 +124,7 @@ func AcceptPartnership(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Changing status of partnership...")
 
 	db := database.DbConn()
-	var request types.PartnerID
+	var request types.PartnerName
 
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
@@ -136,10 +136,10 @@ func AcceptPartnership(w http.ResponseWriter, r *http.Request) {
 
 	sqlStatement := `
 	UPDATE partners
-	SET requestStatus = 'accept'
-	WHERE shopid = $1;
+	SET requestStatus = 'accepted'
+	WHERE shopName = $1;
 	`
-	_, err = db.Exec(sqlStatement, request.ShopId)
+	_, err = db.Exec(sqlStatement, request.ShopName)
 	if err != nil {
 		log.Printf("Failed to update partnership status: %v\n", err)
 		http.Error(w, "Failed to process acceptPartnership", http.StatusInternalServerError)
@@ -155,7 +155,7 @@ func DenyPartnership(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Changing status of partnership...")
 
 	db := database.DbConn()
-	var request types.PartnerID
+	var request types.PartnerName
 
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
@@ -168,9 +168,9 @@ func DenyPartnership(w http.ResponseWriter, r *http.Request) {
 	sqlStatement := `
 	UPDATE partners
 	SET requestStatus = 'denied'
-	WHERE shopid = $1;
+	WHERE shopName = $1;
 	`
-	_, err = db.Exec(sqlStatement, request.ShopId)
+	_, err = db.Exec(sqlStatement, request.ShopName)
 	if err != nil {
 		log.Printf("Failed to update partnership status: %v\n", err)
 		http.Error(w, "Failed to process DenyPartnership", http.StatusInternalServerError)

@@ -44,8 +44,8 @@ type PartnershipRequest struct {
 	Rights    Rights `json:"rights"`
 }
 
-type PartnerID struct {
-	ShopId string `json:"shopId"`
+type PartnerName struct {
+	ShopName string `json:"shopName"`
 }
 
 type tokenClaims struct {
