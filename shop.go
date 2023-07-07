@@ -35,6 +35,7 @@ func main() {
 	}).Methods("POST")
 	router.HandleFunc("/api/v1/partnerships/process", handlers.ProcessPartnership).Methods("POST")
 	router.HandleFunc("/api/v1/partnerships/accept", handlers.AcceptPartnership).Methods("POST")
+	router.HandleFunc("/api/v1/partnerships/deny", handlers.DenyPartnership).Methods("POST")
 	router.HandleFunc("/api/v1/partners", handlers.GetPartners).Methods("GET")
 	router.HandleFunc("/api/v1/shop", handlers.GetShop).Methods("GET")
 	router.HandleFunc("/api/v1/shops", handlers.GetShops).Methods("GET")

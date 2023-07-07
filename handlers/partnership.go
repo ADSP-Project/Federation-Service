@@ -151,6 +151,37 @@ func AcceptPartnership(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func DenyPartnership(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Changing status of partnership...")
+
+	db := database.DbConn()
+	var request types.PartnerID
+
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error decoding JSON: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	//fmt.Printf("Denying partnership with %s", request.ShopId)
+
+	sqlStatement := `
+	UPDATE partners
+	SET requestStatus = 'denied'
+	WHERE shopid = $1;
+	`
+	_, err = db.Exec(sqlStatement, request.ShopId)
+	if err != nil {
+		log.Printf("Failed to update partnership status: %v\n", err)
+		http.Error(w, "Failed to process DenyPartnership", http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintln(w, "Partnership successfully denied")
+	log.Printf("Partnership successfully denied")
+
+}
+
 func RequestPartnership(w http.ResponseWriter, r *http.Request, privKey *rsa.PrivateKey) {
 	var request types.PartnershipRequest
 	json.NewDecoder(r.Body).Decode(&request)
