@@ -47,6 +47,7 @@ const ShopList = () => {
 
   const pendingPartners = partners.filter(partner => partner.requestStatus === 'pending');
   const establishedPartners = partners.filter(partner => partner.requestStatus === 'approved');
+  const requestedPartners = partners.filter(partner => partner.requestStatus === 'sent');
 
   console.log(partners)
 
@@ -88,6 +89,26 @@ const ShopList = () => {
         </thead>
         <tbody>
           {establishedPartners.map(partner => (
+            <tr key={partner.shopId}>
+              <td>{partner.shopId}</td>
+              <td>{partner.shopName}</td>
+              <td><Rights rights={partner.rights} /></td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+
+      <h2>Partnership requests sent</h2>
+      <Table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Rights</th>
+          </tr>
+        </thead>
+        <tbody>
+          {requestedPartners.map(partner => (
             <tr key={partner.shopId}>
               <td>{partner.shopId}</td>
               <td>{partner.shopName}</td>

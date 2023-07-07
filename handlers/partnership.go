@@ -244,6 +244,17 @@ func RequestPartnership(w http.ResponseWriter, r *http.Request, privKey *rsa.Pri
 		return
 	}
 
+	partner, err := database.GetShopById(request.PartnerId)
+	sqlStatement := `
+	INSERT INTO partners (shopid, shopname, canearncommission, canshareinventory, cansharedata, cancopromote, cansell, requeststatus)
+	VALUES ($1, $2, $3, $4, $5, $6, $7, 'sent')`
+	_, err = db.Exec(sqlStatement, partner.Id, partner.Name, request.Rights.CanEarnCommission, request.Rights.CanShareInventory, request.Rights.CanShareData, request.Rights.CanCoPromote, request.Rights.CanSell)
+	if err != nil {
+		log.Printf("Failed to insert new partnership: %v\n", err)
+		http.Error(w, "Failed to process partnership", http.StatusInternalServerError)
+		return
+	}
+
 	// Success
 	fmt.Fprintln(w, "Partnership request successfully sent")
 }

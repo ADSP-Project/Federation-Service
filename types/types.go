@@ -39,6 +39,7 @@ type ShopDisplay struct {
 
 type PartnershipRequest struct {
 	ShopId    string `json:"shopId"`
+	ShopName  string `json:"shopName"`
 	PartnerId string `json:"partnerId"`
 	Rights    Rights `json:"rights"`
 }
