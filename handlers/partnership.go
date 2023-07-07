@@ -51,9 +51,9 @@ func ProcessPartnership(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tokenString := splitToken[1] // Here is your token
-	shopId := request.ShopId
+	shopName := request.ShopName
 
-	publicKeyStr, err := getPublicKeyFromDB(shopId)
+	publicKeyStr, err := getPublicKeyFromDB(shopName)
 	if err != nil {
 		detailedError := fmt.Errorf("Failed to retrieve public key: %w", err)
 		fmt.Printf("%+v\n", detailedError)
@@ -93,9 +93,9 @@ func ProcessPartnership(w http.ResponseWriter, r *http.Request) {
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		db := database.DbConn()
 		shopId := claims["shopId"].(string)
-		partnerId := claims["partnerId"].(string)
+		// partnerId := claims["partnerId"].(string)
 
-		partner, err := database.GetShopById(partnerId)
+		partner, err := database.GetShopByName(shopName)
 		if err != nil {
 			log.Printf("Failed to get shop with id %s: %v\n", shopId, err)
 			http.Error(w, "Failed to process partnership", http.StatusInternalServerError)
@@ -108,7 +108,7 @@ func ProcessPartnership(w http.ResponseWriter, r *http.Request) {
 			VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending')
 		`
 		fmt.Print(request.Rights)
-		_, err = db.Exec(sqlStatement, partnerId, partner.Name, request.Rights.CanEarnCommission, request.Rights.CanShareInventory, request.Rights.CanShareData, request.Rights.CanCoPromote, request.Rights.CanSell)
+		_, err = db.Exec(sqlStatement, partner.Id, partner.Name, request.Rights.CanEarnCommission, request.Rights.CanShareInventory, request.Rights.CanShareData, request.Rights.CanCoPromote, request.Rights.CanSell)
 		if err != nil {
 			log.Printf("Failed to insert new partnership: %v\n", err)
 			http.Error(w, "Failed to process partnership", http.StatusInternalServerError)
@@ -259,12 +259,12 @@ func RequestPartnership(w http.ResponseWriter, r *http.Request, privKey *rsa.Pri
 	fmt.Fprintln(w, "Partnership request successfully sent")
 }
 
-func getPublicKeyFromDB(shopId string) (string, error) {
+func getPublicKeyFromDB(shopName string) (string, error) {
 	db := database.DbConn()
 	defer db.Close()
 
 	var publicKey string
-	row := db.QueryRow("SELECT publicKey FROM shops WHERE id = $1", shopId)
+	row := db.QueryRow("SELECT publicKey FROM shops WHERE name = $1", shopName)
 	err := row.Scan(&publicKey)
 
 	if err != nil {
