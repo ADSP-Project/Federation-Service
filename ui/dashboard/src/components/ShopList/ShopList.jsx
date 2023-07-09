@@ -35,7 +35,7 @@ const handleAcceptButtonClick = async (partner) => {
 
 const handleDenyButtonClick = async (partner) => {
   const partnershipRequest = {
-    shopName: partner.Name, 
+    shopName: partner.shopName, 
   };
 
   const res = await fetch(`${import.meta.env.VITE_FEDERATION_SERVICE}/api/v1/partnerships/deny`, {
