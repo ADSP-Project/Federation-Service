@@ -60,8 +60,21 @@ This repository contains the code for setting up a federated marketplace using G
      Replace `[port]` with the desired port number and `[name]` with the name of the shop.
 
      This will start a shop server that automatically joins the federation by sending a POST request to the federation server.
+     
+7. Let's start dashboar by moving to directory of React application:
+```
+cd Federation-Service/ui/dashboard/
+```   
+One want to initialize dependecies with:
+```
+npm init
+```
+and run **dashboard** with:
+```
+npm run dev
+```
 
      **Important:** Hub and AuthServer from Federation-Hub should be running so that shop can join Federation.
 
-7. Additional Notes:
+9. Additional Notes:
    - You can run multiple instances of the shop server by providing different port numbers and shop names.
