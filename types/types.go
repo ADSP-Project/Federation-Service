@@ -48,6 +48,11 @@ type PartnerName struct {
 	ShopName string `json:"shopName"`
 }
 
+type PartnerStatus struct {
+	ShopName string `json:"shopName"`
+	Accept   string `json:"accept"`
+}
+
 type tokenClaims struct {
 	ShopId    string   `json:"shopId"`
 	PartnerId string   `json:"partnerId"`
