@@ -205,55 +205,6 @@ func AcceptPartnership(w http.ResponseWriter, r *http.Request) {
 	//Create http request to notify other shop
 	accepted := "true"
 	sendNotification(request.ShopName, w, accepted)
-	/*
-		log.Printf("Creating notify request...")
-		log.Printf("Getting webhook url of partner shop...")
-		var partnerWebhookURL string
-		err = db.QueryRow("SELECT webhookurl FROM shops WHERE name = $1", request.ShopName).Scan(&partnerWebhookURL)
-		if err != nil {
-			http.Error(w, "Shop not found", http.StatusBadRequest)
-			log.Printf("Shop not found")
-			return
-		}
-
-		url, err := url.Parse(partnerWebhookURL)
-		if err != nil {
-			http.Error(w, "Error parsing the partner webhook URL", http.StatusInternalServerError)
-			log.Printf("Error parsing webhook URLL")
-			return
-		}
-
-		// removes the '/webhook' part
-		url.Path = ""
-
-		newURL := url.String()
-
-		var StatusNotify types.PartnerStatus
-		StatusNotify.ShopName = globals.ShopName
-		StatusNotify.Accept = "true"
-		log.Printf("making json from %s and request status", StatusNotify.ShopName)
-		jsonData, err := json.Marshal(StatusNotify)
-		if err != nil {
-			http.Error(w, "Failed to create JSON body", http.StatusInternalServerError)
-			log.Printf("Failed to create JSON body")
-			return
-		}
-
-		log.Printf("Sending POST notification to partner at webhook %s", newURL)
-		req, err := http.NewRequest("POST", newURL+"/api/v1/partnerships/notify", bytes.NewBuffer(jsonData))
-		if err != nil {
-			http.Error(w, "Failed to create notification", http.StatusInternalServerError)
-			return
-		}
-		req.Header.Set("Content-Type", "application/json")
-
-		client := &http.Client{}
-		resp, err := client.Do(req)
-		if err != nil || resp.StatusCode != http.StatusOK {
-			http.Error(w, "Failed to send partnership accept notification", http.StatusInternalServerError)
-			return
-		}
-	*/
 
 	fmt.Fprintln(w, "Partnership successfully accepted")
 	log.Printf("Partnership successfully accepted")
