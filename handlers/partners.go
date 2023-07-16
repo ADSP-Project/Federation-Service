@@ -12,6 +12,7 @@ import (
 
 func GetPartners(w http.ResponseWriter, r *http.Request) {
 	db := database.DbConn()
+	defer db.Close()
 
 	rows, err := db.Query("SELECT * FROM partners")
 	if err != nil {

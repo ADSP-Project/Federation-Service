@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/ADSP-Project/Federation-Service/database"
@@ -11,6 +12,7 @@ import (
 func GetShop(w http.ResponseWriter, r *http.Request) {
     shop, err := database.GetShopByName(globals.ShopName)
     if err != nil {
+        log.Printf("%v", err)
         http.Error(w, "Failed to get shop information", http.StatusInternalServerError)
         return
     }

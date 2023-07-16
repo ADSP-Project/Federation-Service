@@ -134,15 +134,21 @@ func PollFederationServer() {
 		json.NewDecoder(resp.Body).Decode(&shops)
 
 		var shopsDisplay []types.ShopDisplay
+		insForm, err := db.Prepare("INSERT INTO shops(name, webhookURL, publicKey, description) VALUES($1,$2,$3,$4)") // modify this line
+		if err != nil {
+			panic(err.Error())
+		}
+		defer insForm.Close()
+		
 		for _, shop := range shops {
-			insForm, err := db.Prepare("INSERT INTO shops(name, webhookURL, publicKey, description) VALUES($1,$2,$3,$4)") // modify this line
+			_, err = insForm.Exec(shop.Name, shop.WebhookURL, shop.PublicKey, shop.Description)
 			if err != nil {
-				panic(err.Error())
+				log.Println(err)
+				continue
 			}
-			insForm.Exec(shop.Name, shop.WebhookURL, shop.PublicKey, shop.Description)
 			shopsDisplay = append(shopsDisplay, types.ShopDisplay{Name: shop.Name, WebhookURL: shop.WebhookURL})
 		}
-
+		
 		// shopsDisplayJSON, _ := json.MarshalIndent(shopsDisplay, "", "    ")
 		// fmt.Printf("Current shops in the federation: \n%s\n", string(shopsDisplayJSON))
 	}

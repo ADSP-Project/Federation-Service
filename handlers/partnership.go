@@ -93,6 +93,7 @@ func ProcessPartnership(w http.ResponseWriter, r *http.Request) {
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		db := database.DbConn()
+		defer db.Close()
 		shopId := claims["shopId"].(string)
 		// partnerId := claims["partnerId"].(string)
 

@@ -72,7 +72,7 @@ const ShopTile = ({ shop }) => {
   console.log("check", isPartner)
   return (
     <Tile>
-      <Image src={randomImage} alt={shop.Name} />
+      <Image src={shop.Image} alt={shop.Name} />
       <TileHeader>{shop.Name}</TileHeader>
       <TileBody>{shop.Description}</TileBody>
       <TileFooter>
