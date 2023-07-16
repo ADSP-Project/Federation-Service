@@ -4,4 +4,5 @@ export const ShopTileContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
   justify-content: space-around;
+  gap: 40px;
 `;
