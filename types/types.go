@@ -39,12 +39,18 @@ type ShopDisplay struct {
 
 type PartnershipRequest struct {
 	ShopId    string `json:"shopId"`
+	ShopName  string `json:"shopName"`
 	PartnerId string `json:"partnerId"`
 	Rights    Rights `json:"rights"`
 }
 
-type PartnerID struct {
-	ShopId string `json:"shopId"`
+type PartnerName struct {
+	ShopName string `json:"shopName"`
+}
+
+type PartnerStatus struct {
+	ShopName string `json:"shopName"`
+	Accept   string `json:"accept"`
 }
 
 type tokenClaims struct {

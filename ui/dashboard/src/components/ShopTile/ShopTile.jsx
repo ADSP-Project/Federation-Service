@@ -46,7 +46,8 @@ const ShopTile = ({ shop }) => {
   const handleJoinButtonClick = async () => {
     setRequestInProgress(true); 
     const partnershipRequest = {
-      ShopId: currentShop.Id, 
+      ShopId: currentShop.Id,
+      ShopName: currentShop.Name, 
       PartnerId: shop.Id,
       Rights: selectedRights
     };
